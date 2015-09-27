@@ -1,0 +1,8 @@
+mdd_exchange,insert,swap	0.419111	0.419111	0.419111	6405	5993	6994
+mdd_exchange,insert,swap_piped	0.419111	0.419111	0.419111	10793	9493	13024
+mdd_exchange,swap,insert	0.419111	0.419111	0.419111	6939	5988	10013
+mdd_exchange,swap,insert_piped	0.419111	0.419111	0.419111	8507	7992	9509
+rnd_exchange,insert,swap	1.61777	0	16.3453	60807	47545	75584
+rnd_exchange,insert,swap_piped	3.83627	0	16.3453	24422	19509	31530
+rnd_exchange,swap,insert	3.12937	0	16.3453	72385	58571	88584
+rnd_exchange,swap,insert_piped	3.67421	0	16.3453	16415	13512	21011
