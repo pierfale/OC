@@ -132,7 +132,7 @@ public:
 
 			for(auto it = _result.begin(); it != _result.end(); ++it) {
 				file << it->first << "\t" << it->second[instance].average_score << "\t" << it->second[instance].min_score << "\t" << it->second[instance].max_score
-						<< "\t" << it->second[instance].average_time << "\t" << it->second[instance].min_time << "\t" << it->second[instance].max_time;
+					 << "\t" << it->second[instance].average_time << "\t" << it->second[instance].min_time << "\t" << it->second[instance].max_time << std::endl;
 			}
 
 			file.close();
@@ -156,7 +156,7 @@ public:
 
 
 			file << it->first << "\t" << total.average_score/(Score)nb_instance << "\t" << total.min_score/(Score)nb_instance << "\t" << total.max_score/(Score)nb_instance
-					<< "\t" << total.average_time/(Time)nb_instance << "\t" << total.min_time/(Time)nb_instance << "\t" << total.max_time/(Time)nb_instance;
+				 << "\t" << total.average_time/(Time)nb_instance << "\t" << total.min_time/(Time)nb_instance << "\t" << total.max_time/(Time)nb_instance << std::endl;
 		}
 
 		file.close();
