@@ -70,6 +70,8 @@ public:
 
 		while(parser.read(input)) {
 			output.reset();
+			output.compute_score(input);
+
 			SolverType::process(program_options, input, output);
 
 			std::cout << "Instance " << (++cpt) << " : score=" << Verifier::process<Size>(input, output) << std::endl;

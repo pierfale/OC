@@ -14,6 +14,7 @@ public:
 		std::sort(&output.job_execution_order[0], &output.job_execution_order[Size], [&](unsigned int job1, unsigned int job2) {
 					 return input.job_deadlines[job1] < input.job_deadlines[job2];
 		 });
+		output.compute_score(input);
 	}
 
 private:

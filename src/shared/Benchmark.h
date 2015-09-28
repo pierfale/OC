@@ -90,6 +90,8 @@ public:
 
 			for(unsigned int run=0; run<RunNumber; run++) {
 				output.reset();
+				output.compute_score(input);
+
 
 				auto t_start = std::chrono::high_resolution_clock::now();
 				SolverType::process(program_options, input, output);

@@ -40,6 +40,7 @@ public:
 			std::swap(remain_inded[current_index], remain_inded[Size-i-1]);
 
 		}
+		output.compute_score(input);
 	}
 
 private:

@@ -57,8 +57,10 @@ public:
 	bool process(const DataInput<Size>& input, DataOutput<Size>& output) {
 		bool r = NeighborhoodDoubleIndex<Size>::incrementIndex();
 
-		if(r)
+		if(r) {
 			std::swap(output.job_execution_order[NeighborhoodDoubleIndex<Size>::_index1], output.job_execution_order[NeighborhoodDoubleIndex<Size>::_index2]);
+			output.compute_score(input, std::min(NeighborhoodDoubleIndex<Size>::_index1, NeighborhoodDoubleIndex<Size>::_index2), std::max(NeighborhoodDoubleIndex<Size>::_index1, NeighborhoodDoubleIndex<Size>::_index2));
+		}
 
 		return r;
 	}
@@ -84,6 +86,7 @@ public:
 			memcpy(save_tail, output.job_execution_order+min_index+1, (max_index-min_index)*sizeof(unsigned int));
 			memcpy(output.job_execution_order+min_index, save_tail, (max_index-min_index)*sizeof(unsigned int));
 			output.job_execution_order[max_index] = save_first;
+			output.compute_score(input, min_index, max_index);
 		}
 
 		return r;
@@ -108,6 +111,11 @@ public:
 		_index = (_index+1)%(Size);
 
 		std::swap(output.job_execution_order[_index], output.job_execution_order[(_index+1)%Size]);
+
+		if(_index+1 < Size)
+			output.compute_score(input, _index, _index+1);
+		else
+			output.compute_score(input);
 
 		return _index != _start_index;
 	}
