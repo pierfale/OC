@@ -5,11 +5,11 @@
 #include <stdexcept>
 #include "shared/ProgramOptions.h"
 
-template<unsigned int Size>
+template<unsigned int Size, typename Logger>
 class BasicParser {
 
 public:
-	BasicParser(const BasicProgramOption<Size>& program_options) : _file(program_options.filename(), std::ios::in) {
+	BasicParser(const BasicProgramOption<Size, Logger>& program_options) : _file(program_options.filename(), std::ios::in) {
 		if (!_file.is_open()) {
 			throw std::runtime_error("Unable to find input data file \""+program_options.filename()+"\"");
 		}
@@ -42,11 +42,11 @@ private:
 	std::ifstream _file;
 };
 
-template<unsigned int Size>
+template<unsigned int Size, typename Logger>
 class BigParser {
 
 public:
-	BigParser(const BasicProgramOption<Size>& program_options) : _file(program_options.filename(), std::ios::in) {
+	BigParser(const BasicProgramOption<Size, Logger>& program_options) : _file(program_options.filename(), std::ios::in) {
 		if (!_file.is_open()) {
 			throw std::runtime_error("Unable to find input data file \""+program_options.filename()+"\"");
 		}

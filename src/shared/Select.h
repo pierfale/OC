@@ -3,14 +3,14 @@
 
 #include "shared/Verifier.h"
 
-template <unsigned int Size>
+template <unsigned int Size, typename Logger>
 class SelectFirst {
 
 public:
-	template<template<unsigned int> class Neighborhood>
-	static bool process(const DataInput<Size>& input, DataOutput<Size>& output, Neighborhood<Size>& neighborhood) {
+	template<template<unsigned int, typename> class Neighborhood>
+	static bool process(const DataInput<Size>& input, DataOutput<Size>& output, Neighborhood<Size, Logger>& neighborhood) {
 
-		unsigned int initial_score = Verifier::process(input, output);
+		unsigned int initial_score = Verifier::process<Size, Logger>(input, output);
 		DataOutput<Size> initial_output(output);
 
 		do {
@@ -20,7 +20,7 @@ public:
 				output = initial_output;
 				return false;
 			}
-		} while(Verifier::process(input, output) >= initial_score);
+		} while(Verifier::process<Size, Logger>(input, output) >= initial_score);
 
 		neighborhood.selected();
 
@@ -28,21 +28,21 @@ public:
 	}
 };
 
-template <unsigned int Size>
+template <unsigned int Size, typename Logger>
 class SelectBest {
 
 public:
-	template<template<unsigned int> class Neighborhood>
-	static bool process(const DataInput<Size>& input, DataOutput<Size>& output, Neighborhood<Size>& neighborhood) {
+	template<template<unsigned int, typename> class Neighborhood>
+	static bool process(const DataInput<Size>& input, DataOutput<Size>& output, Neighborhood<Size, Logger>& neighborhood) {
 		DataOutput<Size> initial_output(output);
 		DataOutput<Size> best_output(output);
-		unsigned int best_score = Verifier::process(input, output);
+		unsigned int best_score = Verifier::process<Size, Logger>(input, output);
 		unsigned int initial_score = best_score;
 
 		while(neighborhood.process(input, output)) {
 
 			unsigned int current_score;
-			if((current_score = Verifier::process(input, output)) < best_score) {
+			if((current_score = Verifier::process<Size, Logger>(input, output)) < best_score) {
 				best_output = output;
 				best_score = current_score;
 			}

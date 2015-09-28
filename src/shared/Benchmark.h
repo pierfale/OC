@@ -6,6 +6,9 @@
 #include <map>
 #include <vector>
 
+#include "shared/BenchLogger.h"
+#include "shared/PassiveLogger.h"
+
 template<unsigned int RunNumber>
 class Benchmark {
 
@@ -19,13 +22,13 @@ public:
 	}
 
 
-	template<typename SolverType, template<unsigned int> class ProgramOptionType>
+	template<typename SolverType, template<unsigned int, typename> class ProgramOptionType>
 	int execute(int argc, const char** argv, const char* best_file_pathname, const std::string& bench_name) {
 
 		int problem_size;
 
 		if(argc < 2)
-			throw std::runtime_error("usage : "+ProgramOptionType<40>::usage());
+			throw std::runtime_error("usage : "+ProgramOptionType<40, PassiveLogger>::usage());
 
 		problem_size = atoi(argv[1]);
 
@@ -50,15 +53,15 @@ public:
 		return EXIT_SUCCESS;
 	}
 
-	template<typename SolverType, template<unsigned int> class ProgramOptionType, unsigned int Size, template<unsigned int> class ParserImpl>
+	template<typename SolverType, template<unsigned int, typename> class ProgramOptionType, unsigned int Size, template<unsigned int, typename> class ParserImpl>
 	void _execute(int argc, const char** argv, const char* best_file_pathname, const std::string& bench_name) {
 		DataInput<Size> input;
 		DataOutput<Size> output;
 
-		ProgramOptionType<Size> program_options;
+		ProgramOptionType<Size, BenchLogger> program_options;
 		program_options.parse(argc, argv);
 
-		ParserImpl<Size> parser(program_options);
+		ParserImpl<Size, BenchLogger> parser(program_options);
 
 		std::cout  << "Launch " << bench_name << std::endl;
 
@@ -87,8 +90,12 @@ public:
 		while(parser.read(input)) {
 			Score score_run_list[RunNumber];
 			Time time_run_list[RunNumber];
+			bool optimal_found_list[RunNumber];
+			unsigned int nb_cost_call_list[RunNumber];
 
 			for(unsigned int run=0; run<RunNumber; run++) {
+				BenchLogger::reset();
+
 				output.reset();
 				output.compute_score(input);
 
@@ -97,12 +104,15 @@ public:
 				SolverType::process(program_options, input, output);
 				auto t_end = std::chrono::high_resolution_clock::now();
 
-				score_run_list[run] = Verifier::process(input, output);
+				score_run_list[run] = Verifier::process<Size, PassiveLogger>(input, output);
+
+				optimal_found_list[run] = best_score[cpt] == score_run_list[run];
 
 				assert(score_run_list[run] >= best_score[cpt]);
 				score_run_list[run] = best_score[cpt] == 0 ? score_run_list[run] : Score(100)*(score_run_list[run]-best_score[cpt])/best_score[cpt];
 
 				time_run_list[run] = std::chrono::duration_cast<std::chrono::microseconds>(t_end-t_start).count();
+				nb_cost_call_list[run] =  BenchLogger::cost_call_number();
 			}
 
 
@@ -118,6 +128,11 @@ public:
 			result.min_time = *minmax_time.first;
 			result.max_time = *minmax_time.second;
 
+			result.optimal_once = std::accumulate(&optimal_found_list[0], &optimal_found_list[RunNumber], false, std::logical_or<bool>()) ? 1 : 0;
+			result.optimal_all = std::accumulate(&optimal_found_list[0], &optimal_found_list[RunNumber], true, std::logical_and<bool>()) ? 1 : 0;
+
+			result.nb_cost_call = std::accumulate(&nb_cost_call_list[0], &nb_cost_call_list[RunNumber], 0)/RunNumber;
+
 			_result[bench_name].push_back(result);
 			cpt++;
 		}
@@ -132,7 +147,8 @@ public:
 
 			for(auto it = _result.begin(); it != _result.end(); ++it) {
 				file << it->first << "\t" << it->second[instance].average_score << "\t" << it->second[instance].min_score << "\t" << it->second[instance].max_score
-					 << "\t" << it->second[instance].average_time << "\t" << it->second[instance].min_time << "\t" << it->second[instance].max_time << std::endl;
+					 << "\t" << it->second[instance].average_time << "\t" << it->second[instance].min_time << "\t" << it->second[instance].max_time
+					 << "\t" << it->second[instance].optimal_once << "\t" << it->second[instance].optimal_all << "\t" << it->second[instance].nb_cost_call << std::endl;
 			}
 
 			file.close();
@@ -151,12 +167,18 @@ public:
 					r.min_time = r1.min_time+r2.min_time;
 					r.max_time = r1.max_time+r2.max_time;
 
+					r.optimal_once = r1.optimal_once+r2.optimal_once;
+					r.optimal_all = r1.optimal_all+r2.optimal_all;
+
+					r.nb_cost_call = r1.nb_cost_call+r2.nb_cost_call;
+
 					return r;
 			});
 
 
 			file << it->first << "\t" << total.average_score/(Score)nb_instance << "\t" << total.min_score/(Score)nb_instance << "\t" << total.max_score/(Score)nb_instance
-				 << "\t" << total.average_time/(Time)nb_instance << "\t" << total.min_time/(Time)nb_instance << "\t" << total.max_time/(Time)nb_instance << std::endl;
+				 << "\t" << total.average_time/(Time)nb_instance << "\t" << total.min_time/(Time)nb_instance << "\t" << total.max_time/(Time)nb_instance
+				 << "\t" << total.optimal_once << "\t" << total.optimal_all << "\t" << total.nb_cost_call/nb_instance << std::endl;
 		}
 
 		file.close();
@@ -167,7 +189,7 @@ private:
 	class Result {
 
 	public:
-		Result () : min_time(0), max_time(0), average_time(0), min_score(0), max_score(0), average_score(0) {
+		Result () : min_time(0), max_time(0), average_time(0), min_score(0), max_score(0), average_score(0), optimal_once(false), optimal_all(false), nb_cost_call(0) {
 
 		}
 
@@ -178,6 +200,11 @@ private:
 		Score min_score;
 		Score max_score;
 		Score average_score;
+
+		unsigned int optimal_once;
+		unsigned int optimal_all;
+
+		unsigned int nb_cost_call;
 
 	};
 	std::map<std::string, std::vector<Result>> _result;

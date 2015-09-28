@@ -10,8 +10,8 @@
 class MDDSolver {
 
 public:
-	template<unsigned int Size>
-	static void process(const BasicProgramOption<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<unsigned int Size, typename Logger>
+	static void process(const BasicProgramOption<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 
 		srand(23); //determinist seed
 

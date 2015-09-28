@@ -4,7 +4,7 @@
 #include <string>
 #include <stdexcept>
 
-template <unsigned int Size>
+template <unsigned int Size, typename Logger>
 class BasicProgramOption {
 
 public:

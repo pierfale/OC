@@ -11,9 +11,9 @@ int main(int argc, const char** argv) {
 
 	Benchmark<30> bench;
 
-	std::vector<const char*> inits = {"rnd", "edd", "mdd"};
-	std::vector<const char*> selects = {"first", "best"};
-	std::vector<const char*> neighborhoods = {"swap", "insert", "exchange"};
+	std::vector<const char*> inits = {/*"rnd", "edd", */"mdd"};
+	std::vector<const char*> selects = {/*"first", */"best"};
+	std::vector<const char*> neighborhoods = {"swap"/*, "insert", "exchange"*/};
 
 #define ARGS_NUMBER 9
 

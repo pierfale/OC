@@ -13,15 +13,15 @@
 
 #include <type_traits>
 
-template <template<unsigned int> class SolverExecution>
+template <template<unsigned int, typename> class SolverExecution>
 class GenerateVNDProgramOption {
 
 public:
 
-	template <unsigned int Size>
-	class VNDProgramOption : public BasicProgramOption<Size> {
+	template <unsigned int Size, typename Logger>
+	class VNDProgramOption : public BasicProgramOption<Size, Logger> {
 
-		typedef void(*SolverFunction)(const VNDProgramOption<Size>& program_options, const DataInput<Size>&, DataOutput<Size>&);
+		typedef void(*SolverFunction)(const VNDProgramOption<Size, Logger>& program_options, const DataInput<Size>&, DataOutput<Size>&);
 
 	public:
 
@@ -34,7 +34,7 @@ public:
 			if(argc < 3)
 				throw std::runtime_error("Not enough argument, usage : "+usage());
 
-			BasicProgramOption<Size>::_data_filename = std::string(argv[2]);
+			BasicProgramOption<Size, Logger>::_data_filename = std::string(argv[2]);
 
 			std::string selectOption = "first";
 			std::string neighborhoodOption = "exchange,swap,insert";
@@ -79,17 +79,17 @@ public:
 				throw std::runtime_error("unknown option parameter "+selectOption+", usage : "+usage());
 		}
 
-		template<typename Init, template<unsigned int> class Select>
+		template<typename Init, template<unsigned int, typename> class Select>
 		void decideSelectOption(const std::string& neighborhoodOption) {
 			decideNeighborhoodOption<Init, Select, 3>(neighborhoodOption, 0);
 		}
 
-		template<typename Init, template<unsigned int> class Select, unsigned int MaxDeep, template<unsigned int> class... Neighborhood>
+		template<typename Init, template<unsigned int, typename> class Select, unsigned int MaxDeep, template<unsigned int, typename> class... Neighborhood>
 		typename std::enable_if<(MaxDeep == 0)>::type decideNeighborhoodOption(const std::string& neighborhoodOption, std::size_t cursor) {
 			throw std::runtime_error("Max neighborhood length reach (current : "+std::to_string(MaxDeep)+")");
 		}
 
-		template<typename Init, template<unsigned int> class Select, unsigned int MaxDeep, template<unsigned int> class... Neighborhood>
+		template<typename Init, template<unsigned int, typename> class Select, unsigned int MaxDeep, template<unsigned int, typename> class... Neighborhood>
 		typename std::enable_if<(MaxDeep > 0)>::type decideNeighborhoodOption(const std::string& neighborhoodOption, std::size_t cursor) {
 			std::size_t pos = neighborhoodOption.find(',', cursor);
 
@@ -98,11 +98,11 @@ public:
 
 			if(pos == std::string::npos) {
 				if(str == "swap")
-					_solver = SolverExecution<Size>::template solve<VNDProgramOption, Init, Select, Neighborhood..., NeighborhoodSwap>;
+					_solver = SolverExecution<Size, Logger>::template solve<VNDProgramOption, Init, Select, Neighborhood..., NeighborhoodSwap>;
 				else if(str == "insert")
-					_solver = SolverExecution<Size>::template solve<VNDProgramOption, Init, Select, Neighborhood..., NeighborhoodInsert>;
+					_solver = SolverExecution<Size, Logger>::template solve<VNDProgramOption, Init, Select, Neighborhood..., NeighborhoodInsert>;
 				else if(str == "exchange") {
-					_solver = SolverExecution<Size>::template solve<VNDProgramOption, Init, Select, Neighborhood..., NeighborhoodExchange>;
+					_solver = SolverExecution<Size, Logger>::template solve<VNDProgramOption, Init, Select, Neighborhood..., NeighborhoodExchange>;
 				}
 				else
 					throw std::runtime_error("unknown option parameter "+str+", usage : "+usage());
@@ -141,31 +141,31 @@ public:
 
 	}
 
-	template<template<unsigned int> class T, unsigned int Size>
-	static void process(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<template<unsigned int, typename> class T, unsigned int Size, typename Logger>
+	static void process(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		program_options.solverFunction()(program_options, input, output);
 	}
 };
 
-template<unsigned int Size>
+template<unsigned int Size, typename Logger>
 class VNDSolverExecution {
 
 public:
-	template<template<unsigned int> class T, typename Init, template<unsigned int> class Select, template<unsigned int> class... Neighborhood>
-	static void solve(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<template<unsigned int, typename> class T, typename Init, template<unsigned int, typename> class Select, template<unsigned int, typename> class... Neighborhood>
+	static void solve(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		Init::process(program_options, input, output);
 		while(_VNDSolverFunction<T, Select, Neighborhood...>(program_options, input, output));
 	}
 
-	template<template<unsigned int> class T, template<unsigned int> class Select>
-	static bool _VNDSolverFunction(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<template<unsigned int, typename> class T, template<unsigned int, typename> class Select>
+	static bool _VNDSolverFunction(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		return false;
 	}
 
-	template<template<unsigned int> class T, template<unsigned int> class Select, template<unsigned int> class CurrentNeighborhood,  template<unsigned int> class... Neighborhood>
-	static bool _VNDSolverFunction(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
-		CurrentNeighborhood<Size> neighborhood;
-		if(Select<Size>::process(input, output, neighborhood)) {
+	template<template<unsigned int, typename> class T, template<unsigned int, typename> class Select, template<unsigned int, typename> class CurrentNeighborhood,  template<unsigned int, typename> class... Neighborhood>
+	static bool _VNDSolverFunction(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+		CurrentNeighborhood<Size, Logger> neighborhood;
+		if(Select<Size, Logger>::process(input, output, neighborhood)) {
 			return true;
 		}
 		else {
@@ -181,36 +181,36 @@ public:
 
 	}
 
-	template<template<unsigned int> class T, unsigned int Size>
-	static void process(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<template<unsigned int, typename> class T, unsigned int Size, typename Logger>
+	static void process(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		program_options.solverFunction()(program_options, input, output);
 	}
 
 };
 
-template<unsigned int Size>
+template<unsigned int Size, typename Logger>
 class VNDPipedSolverExecution {
 
 public:
-	template<template<unsigned int> class T, typename Init, template<unsigned int> class Select, template<unsigned int> class... Neighborhood>
-	static void solve(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<template<unsigned int, typename> class T, typename Init, template<unsigned int, typename> class Select, template<unsigned int, typename> class... Neighborhood>
+	static void solve(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		Init::process(program_options, input, output);
 		_VNDSolverFunction<T, Select, sizeof...(Neighborhood), Neighborhood...>(program_options, input, output);
 	}
 
 
-	template<template<unsigned int> class T, template<unsigned int> class Select, unsigned int NeighborhoodRemain, template<unsigned int> class CurrentNeighborhood, template<unsigned int> class... Neighborhood>
-	static typename std::enable_if<(NeighborhoodRemain == 0)>::type _VNDSolverFunction(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<template<unsigned int, typename> class T, template<unsigned int, typename> class Select, unsigned int NeighborhoodRemain, template<unsigned int, typename> class CurrentNeighborhood, template<unsigned int, typename> class... Neighborhood>
+	static typename std::enable_if<(NeighborhoodRemain == 0)>::type _VNDSolverFunction(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 
 	}
 
-	template<template<unsigned int> class T,  template<unsigned int> class Select, unsigned int NeighborhoodRemain, template<unsigned int> class CurrentNeighborhood, template<unsigned int> class... Neighborhood>
-	static typename std::enable_if<(NeighborhoodRemain > 0)>::type _VNDSolverFunction(const T<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<template<unsigned int, typename> class T,  template<unsigned int, typename> class Select, unsigned int NeighborhoodRemain, template<unsigned int, typename> class CurrentNeighborhood, template<unsigned int, typename> class... Neighborhood>
+	static typename std::enable_if<(NeighborhoodRemain > 0)>::type _VNDSolverFunction(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 
-		CurrentNeighborhood<Size> neighborhood;
+		CurrentNeighborhood<Size, Logger> neighborhood;
 
-		if(Select<Size>::process(input, output, neighborhood)) {
-			while(Select<Size>::process(input, output, neighborhood));
+		if(Select<Size, Logger>::process(input, output, neighborhood)) {
+			while(Select<Size, Logger>::process(input, output, neighborhood));
 			_VNDSolverFunction<T, Select, sizeof...(Neighborhood)+1, Neighborhood..., CurrentNeighborhood>(program_options, input, output);
 		}
 		else

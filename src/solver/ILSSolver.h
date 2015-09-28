@@ -1,5 +1,5 @@
-#ifndef _HILL_CLIMBING_SOLVER_H
-#define _HILL_CLIMBING_SOLVER_H
+#ifndef _ILS_SOLVER_H
+#define _ILS_SOLVER_H
 
 #include <algorithm>
 #include <chrono>
@@ -12,14 +12,14 @@
 #include "shared/Neighborhood.h"
 #include "shared/Select.h"
 
-template <unsigned int Size, typename Logger>
-class HillClimbingProgramOption : public BasicProgramOption<Size, Logger> {
+template <unsigned int Size>
+class ILSProgramOption : public ILSOption<Size> {
 
-	typedef void(*SolverFunction)(const HillClimbingProgramOption<Size, Logger>& program_options, const DataInput<Size>&, DataOutput<Size>&);
+	typedef void(*SolverFunction)(const ILSProgramOption<Size>& program_options, const DataInput<Size>&, DataOutput<Size>&);
 
 public:
 
-	HillClimbingProgramOption() : _solver(nullptr) {
+	ILSProgramOption() : _solver(nullptr) {
 
 	}
 
@@ -28,10 +28,10 @@ public:
 		if(argc < 3)
 			throw std::runtime_error("Not enough argument, usage : "+usage());
 
-		BasicProgramOption<Size, Logger>::_data_filename = std::string(argv[2]);
+		BasicProgramOption<Size>::_data_filename = std::string(argv[2]);
 
-		std::string selectOption = "first";
-		std::string neighborhoodOption = "first";
+		std::string localSearchOption = "first";
+		std::string pertubationOption = "first";
 		std::string initOption = "rnd";
 
 		for(unsigned int i=3; i<argc; i += 2) {
@@ -43,10 +43,10 @@ public:
 
 			std::string next(argv[i+1]);
 
-			if(current == "-select")
-				selectOption = next;
-			else if(current == "-neighborhood")
-				neighborhoodOption = next;
+			if(current == "-local-search")
+				localSearchOption = next;
+			else if(current == "-pertubation")
+				pertubationOption = next;
 			else if(current == "-init")
 				initOption = next;
 			else
@@ -62,7 +62,7 @@ public:
 
 	}
 
-	template<template<unsigned int, typename> class Select>
+	template<template<unsigned int> class Select>
 	void decideSelectOption(const std::string& neighborhoodOption, const std::string& initOption) {
 		if(neighborhoodOption == "insert")
 			decideNeighborhoodOption<Select, NeighborhoodInsert>(initOption);
@@ -75,7 +75,7 @@ public:
 			throw std::runtime_error("unknown option "+neighborhoodOption+", usage : "+usage());
 	}
 
-	template<template<unsigned int, typename> class Select, template<unsigned int, typename> class Neighborhood>
+	template<template<unsigned int> class Select, template<unsigned int> class Neighborhood>
 	void decideNeighborhoodOption(const std::string& initOption) {
 		if(initOption == "rnd")
 			_solver = hillClimbingSolverFunction<Select, Neighborhood, RandomSolver>;
@@ -96,12 +96,19 @@ public:
 		return _solver;
 	}
 
-	template<template<unsigned int, typename> class Select, template<unsigned int, typename> class Neighborhood, typename Init>
-	static void hillClimbingSolverFunction(const HillClimbingProgramOption<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<typename Init>
+	static void ILSSolverFunction(const HillClimbingProgramOption<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		Init::process(program_options, input, output);
-		Neighborhood<Size, Logger> neighborhood;
 
-		while(Select<Size, Logger>::process(input, output, neighborhood));
+		LocalSearch::process(program_options, input, output);
+
+		do {
+			Pertubation::process(input, output);
+		} while(true);
+
+		Neighborhood<Size> neighborhood;
+
+		while(Select<Size>::process(input, output, neighborhood));
 	}
 
 private:
@@ -115,8 +122,8 @@ public:
 
 	}
 
-	template<unsigned int Size, typename Logger>
-	static void process(const HillClimbingProgramOption<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
+	template<unsigned int Size>
+	static void process(const HillClimbingProgramOption<Size>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		program_options.solverFunction()(program_options, input, output);
 	}
 

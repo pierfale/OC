@@ -1,7 +1,7 @@
 #ifndef _NEIGHBORHOOD_H
 #define _NEIGHBORHOOD_H
 
-template <unsigned int Size>
+template <unsigned int Size, typename Logger>
 class NeighborhoodDoubleIndex {
 
 public:
@@ -46,20 +46,20 @@ protected:
 	unsigned int _start_index2;
 };
 
-template <unsigned int Size>
-class NeighborhoodSwap : public NeighborhoodDoubleIndex<Size> {
+template <unsigned int Size,  typename Logger>
+class NeighborhoodSwap : public NeighborhoodDoubleIndex<Size, Logger> {
 
 public:
-	NeighborhoodSwap() : NeighborhoodDoubleIndex<Size>() {
+	NeighborhoodSwap() : NeighborhoodDoubleIndex<Size, Logger>() {
 
 	}
 
 	bool process(const DataInput<Size>& input, DataOutput<Size>& output) {
-		bool r = NeighborhoodDoubleIndex<Size>::incrementIndex();
+		bool r = NeighborhoodDoubleIndex<Size, Logger>::incrementIndex();
 
 		if(r) {
-			std::swap(output.job_execution_order[NeighborhoodDoubleIndex<Size>::_index1], output.job_execution_order[NeighborhoodDoubleIndex<Size>::_index2]);
-			output.compute_score(input, std::min(NeighborhoodDoubleIndex<Size>::_index1, NeighborhoodDoubleIndex<Size>::_index2), std::max(NeighborhoodDoubleIndex<Size>::_index1, NeighborhoodDoubleIndex<Size>::_index2));
+			std::swap(output.job_execution_order[NeighborhoodDoubleIndex<Size, Logger>::_index1], output.job_execution_order[NeighborhoodDoubleIndex<Size, Logger>::_index2]);
+			output.compute_score(input, std::min(NeighborhoodDoubleIndex<Size, Logger>::_index1, NeighborhoodDoubleIndex<Size, Logger>::_index2), std::max(NeighborhoodDoubleIndex<Size, Logger>::_index1, NeighborhoodDoubleIndex<Size, Logger>::_index2));
 		}
 
 		return r;
@@ -67,18 +67,18 @@ public:
 
 };
 
-template <unsigned int Size>
-class NeighborhoodInsert : public NeighborhoodDoubleIndex<Size>  {
+template <unsigned int Size,  typename Logger>
+class NeighborhoodInsert : public NeighborhoodDoubleIndex<Size, Logger>  {
 public:
-	NeighborhoodInsert() : NeighborhoodDoubleIndex<Size>() {
+	NeighborhoodInsert() : NeighborhoodDoubleIndex<Size, Logger>() {
 
 	}
 
 	bool process(const DataInput<Size>& input, DataOutput<Size>& output) {
-		bool r = NeighborhoodDoubleIndex<Size>::incrementIndex();
+		bool r = NeighborhoodDoubleIndex<Size, Logger>::incrementIndex();
 
-		unsigned int min_index = std::min(NeighborhoodDoubleIndex<Size>::_index1, NeighborhoodDoubleIndex<Size>::_index2);
-		unsigned int max_index = std::max(NeighborhoodDoubleIndex<Size>::_index1, NeighborhoodDoubleIndex<Size>::_index2);
+		unsigned int min_index = std::min(NeighborhoodDoubleIndex<Size, Logger>::_index1, NeighborhoodDoubleIndex<Size, Logger>::_index2);
+		unsigned int max_index = std::max(NeighborhoodDoubleIndex<Size, Logger>::_index1, NeighborhoodDoubleIndex<Size, Logger>::_index2);
 
 		if(r) {
 			unsigned int save_first = output.job_execution_order[min_index];
@@ -94,7 +94,7 @@ public:
 
 };
 
-template <unsigned int Size>
+template <unsigned int Size,  typename Logger>
 class NeighborhoodExchange {
 
 public:

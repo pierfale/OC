@@ -57,6 +57,7 @@ add_executable(MDDSolver ${shared_files} ${solver_files} src/executable/MDD.cpp)
 add_executable(HillClimbingSolver ${shared_files} ${solver_files} src/executable/HillClimbing.cpp)
 add_executable(VNDSolver ${shared_files} ${solver_files} src/executable/VND.cpp)
 add_executable(VNDPipedSolver ${shared_files} ${solver_files} src/executable/VNDPiped.cpp)
+add_executable(TabuSearchSolver ${shared_files} ${solver_files} src/executable/TabuSearch.cpp)
 
 # Benchmark
 add_executable(HillClimbingBenchmark ${shared_files} ${solver_files} src/executable/BenchHillClimbing.cpp)

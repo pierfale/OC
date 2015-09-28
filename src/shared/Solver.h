@@ -14,8 +14,9 @@
 #include "shared/DataOutput.h"
 #include "shared/Parser.h"
 #include "shared/Verifier.h"
+#include "shared/PassiveLogger.h"
 
-template<typename SolverType, template<unsigned int> class ProgramOptionType>
+template<typename SolverType, template<unsigned int, typename> class ProgramOptionType>
 class Solver {
 
 public:
@@ -28,7 +29,7 @@ public:
 		int problem_size;
 
 		if(argc < 2)
-			throw std::runtime_error("usage : "+ProgramOptionType<40>::usage());
+			throw std::runtime_error("usage : "+ProgramOptionType<40, PassiveLogger>::usage());
 
 		problem_size = atoi(argv[1]);
 
@@ -53,15 +54,15 @@ public:
 		return EXIT_SUCCESS;
 	}
 
-	template<unsigned int Size, template<unsigned int> class ParserImpl>
+	template<unsigned int Size, template<unsigned int, typename> class ParserImpl>
 	static int _execute(int argc, const char** argv) {
 		DataInput<Size> input;
 		DataOutput<Size> output;
 
-		ProgramOptionType<Size> program_options;
+		ProgramOptionType<Size, PassiveLogger> program_options;
 		program_options.parse(argc, argv);
 
-		ParserImpl<Size> parser(program_options);
+		ParserImpl<Size, PassiveLogger> parser(program_options);
 
 		std::clock_t c_start = std::clock();
 		auto t_start = std::chrono::high_resolution_clock::now();
@@ -74,7 +75,7 @@ public:
 
 			SolverType::process(program_options, input, output);
 
-			std::cout << "Instance " << (++cpt) << " : score=" << Verifier::process<Size>(input, output) << std::endl;
+			std::cout << "Instance " << (++cpt) << " : score=" << Verifier::process<Size, PassiveLogger>(input, output) << std::endl;
 		}
 
 		std::clock_t c_end = std::clock();
