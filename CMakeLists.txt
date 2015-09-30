@@ -22,6 +22,7 @@ endmacro(copy_files)
 
 add_definitions(-O3)
 add_definitions(-msse -msse2 -msse3 -mfpmath=sse -march=native)
+#add_definitions(-g)
 
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -62,3 +63,4 @@ add_executable(TabuSearchSolver ${shared_files} ${solver_files} src/executable/T
 # Benchmark
 add_executable(HillClimbingBenchmark ${shared_files} ${solver_files} src/executable/BenchHillClimbing.cpp)
 add_executable(VNDBenchmark ${shared_files} ${solver_files} src/executable/BenchVND.cpp)
+add_executable(TabuSearchBenchmark ${shared_files} ${solver_files} src/executable/BenchTabuSearch.cpp)
