@@ -9,7 +9,7 @@ int main(int argc, const char** argv) {
 	}
 
 
-	Benchmark<30> bench;
+	Benchmark<1> bench;
 
 	std::vector<const char*> inits = {"mdd"};
 

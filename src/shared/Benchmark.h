@@ -105,7 +105,7 @@ public:
 				auto t_end = std::chrono::high_resolution_clock::now();
 
 				score_run_list[run] = Verifier::process<Size, PassiveLogger>(input, output);
-
+				std::cout << "Instance " << cpt << " : " << score_run_list[run] << (best_score[cpt] == score_run_list[run] ? " Optimal !" : "") << std::endl;
 				optimal_found_list[run] = best_score[cpt] == score_run_list[run];
 
 				assert(score_run_list[run] >= best_score[cpt]);
@@ -113,6 +113,9 @@ public:
 
 				time_run_list[run] = std::chrono::duration_cast<std::chrono::microseconds>(t_end-t_start).count();
 				nb_cost_call_list[run] =  BenchLogger::cost_call_number();
+				//cpt++;
+
+
 			}
 
 

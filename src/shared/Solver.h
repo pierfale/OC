@@ -65,10 +65,10 @@ public:
 		ParserImpl<Size, PassiveLogger> parser(program_options);
 
 		std::clock_t c_start = std::clock();
-		auto t_start = std::chrono::high_resolution_clock::now();
 
 		unsigned int cpt = 0;
 
+		auto t_start = std::chrono::high_resolution_clock::now();
 		while(parser.read(input)) {
 			output.reset();
 			output.compute_score(input);
@@ -78,14 +78,9 @@ public:
 			std::cout << "Instance " << (++cpt) << " : score=" << Verifier::process<Size, PassiveLogger>(input, output) << std::endl;
 		}
 
-		std::clock_t c_end = std::clock();
-			auto t_end = std::chrono::high_resolution_clock::now();
+		auto t_end = std::chrono::high_resolution_clock::now();
 
-			std::cout << std::fixed << std::setprecision(2) << "CPU time used: "
-					  << 1000.0 * (c_end-c_start) / CLOCKS_PER_SEC << " ms\n"
-					  << "Wall clock time passed: "
-					  << std::chrono::duration<double, std::milli>(t_end-t_start).count()
-					  << " ms\n";
+		std::cout << std::chrono::duration_cast<std::chrono::microseconds>(t_end-t_start).count() << " micro seconds " << std::endl;
 
 	}
 

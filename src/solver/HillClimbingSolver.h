@@ -8,6 +8,7 @@
 #include "solver/RandomSolver.h"
 #include "solver/EDDSolver.h"
 #include "solver/MDDSolver.h"
+#include "solver/PassiveSolver.h"
 
 #include "shared/Neighborhood.h"
 #include "shared/Select.h"
@@ -81,9 +82,10 @@ public:
 			_solver = hillClimbingSolverFunction<Select, Neighborhood, RandomSolver>;
 		else if(initOption == "edd")
 			_solver = hillClimbingSolverFunction<Select, Neighborhood, EDDSolver>;
-		else if(initOption == "mdd") {
+		else if(initOption == "mdd")
 			_solver = hillClimbingSolverFunction<Select, Neighborhood, MDDSolver>;
-		}
+		else if(initOption == "none")
+			_solver = hillClimbingSolverFunction<Select, Neighborhood, PassiveSolver>;
 		else
 			throw std::runtime_error("unknown option "+initOption+", usage : "+usage());
 	}

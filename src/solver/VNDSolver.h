@@ -10,6 +10,7 @@
 #include "solver/RandomSolver.h"
 #include "solver/EDDSolver.h"
 #include "solver/MDDSolver.h"
+#include "solver/PassiveSolver.h"
 
 #include <type_traits>
 
@@ -65,8 +66,10 @@ public:
 				decideInitOption<EDDSolver>(selectOption, neighborhoodOption);
 			else if(initOption == "mdd")
 				decideInitOption<MDDSolver>(selectOption, neighborhoodOption);
+			else if(initOption == "none")
+				decideInitOption<PassiveSolver>(selectOption, neighborhoodOption);
 			else
-				throw std::runtime_error("unknown option parameter"+initOption+", usage : "+usage());
+				throw std::runtime_error("unknown option parameter "+initOption+", usage : "+usage());
 		}
 
 		template<typename Init>

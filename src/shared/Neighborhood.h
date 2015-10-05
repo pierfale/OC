@@ -38,6 +38,19 @@ public:
 		return _index1 != _start_index1 || _index2 != _start_index2;
 	}
 
+	void rand() {
+		_index1 = ::rand()%Size;
+		_index2 = ::rand()%Size;
+
+		if(_index1 == _index2) {
+			_index2++;
+		}
+
+		if(_index2 >= Size) {
+			_index2 = 0;
+		}
+	}
+
 protected:
 	unsigned int _index1;
 	unsigned int _index2;
@@ -105,6 +118,10 @@ public:
 
 	void selected() {
 
+	}
+
+	void rand() {
+		_index = ::rand()%Size;
 	}
 
 	bool process(const DataInput<Size>& input, DataOutput<Size>& output) {
