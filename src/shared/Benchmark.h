@@ -105,7 +105,7 @@ public:
 				auto t_end = std::chrono::high_resolution_clock::now();
 
 				score_run_list[run] = Verifier::process<Size, PassiveLogger>(input, output);
-				std::cout << "Instance " << cpt << " : " << score_run_list[run] << (best_score[cpt] == score_run_list[run] ? " Optimal !" : "") << std::endl;
+				//std::cout << "Instance " << cpt << " : " << score_run_list[run] << (best_score[cpt] == score_run_list[run] ? " Optimal !" : "") << std::endl;
 				optimal_found_list[run] = best_score[cpt] == score_run_list[run];
 
 				assert(score_run_list[run] >= best_score[cpt]);
@@ -115,8 +115,9 @@ public:
 				nb_cost_call_list[run] =  BenchLogger::cost_call_number();
 				//cpt++;
 
-
 			}
+			std::cout << std::endl;
+
 
 
 			Result result;
@@ -157,6 +158,16 @@ public:
 			file.close();
 		}
 
+		for(auto it = _result.begin(); it != _result.end(); ++it) {
+			std::ofstream file(output_file_pathname+"_"+it->first, std::ios::out | std::ios::trunc);
+			for(unsigned int instance = 0; instance < nb_instance; instance++) {
+				file << (instance+1)<< "\t" << it->second[instance].average_score << "\t" << it->second[instance].min_score << "\t" << it->second[instance].max_score
+					 << "\t" << it->second[instance].average_time << "\t" << it->second[instance].min_time << "\t" << it->second[instance].max_time
+					 << "\t" << it->second[instance].optimal_once << "\t" << it->second[instance].optimal_all << "\t" << it->second[instance].nb_cost_call << std::endl;
+			}
+			file.close();
+		}
+
 		std::ofstream file(output_file_pathname, std::ios::out | std::ios::trunc);
 
 		for(auto it = _result.begin(); it != _result.end(); ++it) {
@@ -179,12 +190,15 @@ public:
 			});
 
 
+
 			file << it->first << "\t" << total.average_score/(Score)nb_instance << "\t" << total.min_score/(Score)nb_instance << "\t" << total.max_score/(Score)nb_instance
 				 << "\t" << total.average_time/(Time)nb_instance << "\t" << total.min_time/(Time)nb_instance << "\t" << total.max_time/(Time)nb_instance
 				 << "\t" << total.optimal_once << "\t" << total.optimal_all << "\t" << total.nb_cost_call/nb_instance << std::endl;
 		}
 
 		file.close();
+
+
 	}
 
 

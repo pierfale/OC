@@ -11,8 +11,7 @@ class RandomSolver {
 public:
 	template<unsigned int Size, typename Logger>
 	static void process(const BasicProgramOption<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
-		unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-		shuffle(&output.job_execution_order[0], &output.job_execution_order[Size], std::default_random_engine(seed));
+		std::random_shuffle(&output.job_execution_order[0], &output.job_execution_order[Size]);
 		output.compute_score(input);
 	}
 
