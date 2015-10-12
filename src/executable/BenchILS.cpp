@@ -11,21 +11,30 @@ int main(int argc, const char** argv) {
 
 	Benchmark<1> bench;
 
-	std::vector<const char*> perturbations = {"swap", "insert", "exchange"};
-#define ARGS_NUMBER 5
+	std::vector<const char*> perturbations = {"swap"/*, "insert", "exchange"*/};
+	std::vector<const char*> stop = {"time"/*, "update"*/};
+#define ARGS_NUMBER 7
 
 	const char* bench_argv[ARGS_NUMBER];
 	bench_argv[0] = argv[0];
 	bench_argv[1] = argv[1];
 	bench_argv[2] = argv[2];
 	bench_argv[3] = "-perturbation";
+	bench_argv[5] = "-stop";
 
 	for(unsigned int perturbation_index = 0; perturbation_index < perturbations.size(); perturbation_index++) {
 		bench_argv[4] = perturbations[perturbation_index];
 
-		std::string name(bench_argv[4]);
+		for(unsigned int stop_index = 0; stop_index < stop.size(); stop_index++) {
+			bench_argv[6] = stop[stop_index];
 
-		bench.execute<ILSSolver, ILSProgramOption>(ARGS_NUMBER, bench_argv, argv[3], name);
+			std::string name(bench_argv[4]);
+			name += "_";
+			name += bench_argv[6];
+
+			bench.execute<ILSSolver, ILSProgramOption>(ARGS_NUMBER, bench_argv, argv[3], name);
+		}
+
 
 	}
 

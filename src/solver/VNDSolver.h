@@ -157,7 +157,7 @@ public:
 	template<template<unsigned int, typename> class T, typename Init, template<unsigned int, typename> class Select, template<unsigned int, typename> class... Neighborhood>
 	static void solve(const T<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output) {
 		Init::process(program_options, input, output);
-		while(_VNDSolverFunction<T, Select, Neighborhood...>(program_options, input, output));
+		while(_VNDSolverFunction<T, Select, Neighborhood...>(program_options, input, output)) Logger::upgradeSolution(input, output);
 	}
 
 	template<template<unsigned int, typename> class T, template<unsigned int, typename> class Select>
@@ -213,7 +213,8 @@ public:
 		CurrentNeighborhood<Size, Logger> neighborhood;
 
 		if(Select<Size, Logger>::process(input, output, neighborhood)) {
-			while(Select<Size, Logger>::process(input, output, neighborhood));
+			Logger::upgradeSolution(input, output);
+			while(Select<Size, Logger>::process(input, output, neighborhood)) Logger::upgradeSolution(input, output);
 			_VNDSolverFunction<T, Select, sizeof...(Neighborhood)+1, Neighborhood..., CurrentNeighborhood>(program_options, input, output);
 		}
 		else

@@ -64,8 +64,8 @@ public:
 		BasicProgramOption<Size, Logger>::_data_filename = std::string(argv[2]);
 
 		std::string localSearchOption = "first";
-		std::string pertubationOption = "first";
-		std::string initOption = "rnd";
+		std::string pertubationOption = "swap";
+		std::string stopOption = "update";
 
 		for(unsigned int i=3; i<argc; i += 2) {
 			std::string current(argv[i]);
@@ -80,8 +80,8 @@ public:
 				localSearchOption = next;
 			else if(current == "-perturbation")
 				pertubationOption = next;
-			else if(current == "-init")
-				initOption = next;
+			else if(current == "-stop")
+				stopOption = next;
 			else
 				throw std::runtime_error("unknown option "+current+", usage : "+usage());
 		}
@@ -98,24 +98,34 @@ public:
 		local_search_args[5] = "-select";
 		local_search_args[6] = "best";
 		local_search_args[7] = "-neighborhood-order";
-		local_search_args[8] = "exchange,insert";
+		local_search_args[8] = "exchange,insert,swap";
 
 
 		local_search_program_option->parse(N_ARG, local_search_args);
 		_local_search_program_option = local_search_program_option;
 
 		if(pertubationOption == "swap")
-			_solver = ILSSolverFunction<MDDSolver, VNDSolver, GenerateVNDProgramOption<VNDSolverExecution>::VNDProgramOption, GeneratePertubation<NeighborhoodSwap>::Perturbation, AcceptBest>;
+			selectStopOption<MDDSolver, VNDSolver, GenerateVNDProgramOption<VNDSolverExecution>::VNDProgramOption, GeneratePertubation<NeighborhoodSwap>::Perturbation, AcceptBest>(stopOption);
 		else if(pertubationOption == "insert")
-			_solver = ILSSolverFunction<MDDSolver, VNDSolver, GenerateVNDProgramOption<VNDSolverExecution>::VNDProgramOption, GeneratePertubation<NeighborhoodInsert>::Perturbation, AcceptBest>;
+			selectStopOption<MDDSolver, VNDSolver, GenerateVNDProgramOption<VNDSolverExecution>::VNDProgramOption, GeneratePertubation<NeighborhoodInsert>::Perturbation, AcceptBest>(stopOption);
 		else if(pertubationOption == "exchange")
-			_solver = ILSSolverFunction<MDDSolver, VNDSolver, GenerateVNDProgramOption<VNDSolverExecution>::VNDProgramOption, GeneratePertubation<NeighborhoodExchange>::Perturbation, AcceptBest>;
+			selectStopOption<MDDSolver, VNDSolver, GenerateVNDProgramOption<VNDSolverExecution>::VNDProgramOption, GeneratePertubation<NeighborhoodExchange>::Perturbation, AcceptBest>(stopOption);
 		else
 			throw std::runtime_error("unknown option "+pertubationOption+", usage : "+usage());
 	}
 
+	template<typename Init, typename LocalSearch, template<unsigned int, typename>  class LocalSearchProgramOption, template<unsigned int, typename> class Perturbation, template<unsigned int, typename> class Acceptance>
+	void selectStopOption(const std::string& stopOption) {
+		if(stopOption == "update")
+			_solver = ILSSolverFunctionCountUpdate<Init, LocalSearch, LocalSearchProgramOption, Perturbation, Acceptance>;
+		else if(stopOption == "time")
+			_solver = ILSSolverFunctionCountTime<Init, LocalSearch, LocalSearchProgramOption, Perturbation, Acceptance>;
+		else
+			throw std::runtime_error("unknown option "+stopOption+", usage : "+usage());
+	}
+
 	static std::string usage() {
-		return std::string("<problem_size> <data_filename> [-perturbation (insert | swap | exchange)]");
+		return std::string("<problem_size> <data_filename> [-perturbation (insert | swap | exchange)] [-stop (update | time)]");
 	}
 
 	SolverFunction solverFunction() const {
@@ -127,7 +137,7 @@ public:
 	}
 
 	template<typename Init, typename LocalSearch, template<unsigned int, typename>  class LocalSearchProgramOption, template<unsigned int, typename> class Perturbation, template<unsigned int, typename> class Acceptance>
-	static void ILSSolverFunction(const ILSProgramOption<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output, void* local_search_program_options) {
+	static void ILSSolverFunctionCountUpdate(const ILSProgramOption<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output, void* local_search_program_options) {
 		Init::process(program_options, input, output);
 
 		LocalSearch::process(*reinterpret_cast<LocalSearchProgramOption<Size, Logger>*>(local_search_program_options), input, output);
@@ -146,6 +156,34 @@ public:
 				 count_since_last++;
 
 		} while(count_since_last < 100);
+	}
+
+	template<typename Init, typename LocalSearch, template<unsigned int, typename>  class LocalSearchProgramOption, template<unsigned int, typename> class Perturbation, template<unsigned int, typename> class Acceptance>
+	static void ILSSolverFunctionCountTime(const ILSProgramOption<Size, Logger>& program_options, const DataInput<Size>& input, DataOutput<Size>& output, void* local_search_program_options) {
+
+		auto t_start = std::chrono::high_resolution_clock::now();
+		auto t_end = std::chrono::high_resolution_clock::now();
+		Init::process(program_options, input, output);
+
+		Logger::enableUpgrade(false);
+
+		LocalSearch::process(*reinterpret_cast<LocalSearchProgramOption<Size, Logger>*>(local_search_program_options), input, output);
+
+		do {
+			DataOutput<Size> current_output = output;
+			Perturbation<Size, Logger>::process(input, current_output);
+			LocalSearch::process(*reinterpret_cast<LocalSearchProgramOption<Size, Logger>*>(local_search_program_options), input, current_output);
+
+			if(Acceptance<Size, Logger>::process(input, output, current_output)) {
+				output = current_output;
+
+				Logger::enableUpgrade(true);
+				Logger::upgradeSolution(input, output);
+				Logger::enableUpgrade(false);
+			}
+
+			t_end = std::chrono::high_resolution_clock::now();
+		} while(std::chrono::duration_cast<std::chrono::seconds>(t_end-t_start).count() < 60);
 	}
 
 private:

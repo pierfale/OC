@@ -3,3 +3,7 @@
 void PassiveLogger::verifier() {
 
 }
+
+void PassiveLogger::enableUpgrade(bool state) {
+
+}

@@ -103,7 +103,7 @@ public:
 		Init::process(program_options, input, output);
 		Neighborhood<Size, Logger> neighborhood;
 
-		while(Select<Size, Logger>::process(input, output, neighborhood));
+		while(Select<Size, Logger>::process(input, output, neighborhood)) Logger::upgradeSolution(input, output);
 	}
 
 private:

@@ -91,10 +91,10 @@ public:
 			Score score_run_list[RunNumber];
 			Time time_run_list[RunNumber];
 			bool optimal_found_list[RunNumber];
-			unsigned int nb_cost_call_list[RunNumber];
+			unsigned long long nb_cost_call_list[RunNumber];
 
 			for(unsigned int run=0; run<RunNumber; run++) {
-				BenchLogger::reset();
+				BenchLogger::reset(best_score[cpt], bench_name+"_update_"+std::to_string(cpt));
 
 				output.reset();
 				output.compute_score(input);
@@ -113,11 +113,8 @@ public:
 
 				time_run_list[run] = std::chrono::duration_cast<std::chrono::microseconds>(t_end-t_start).count();
 				nb_cost_call_list[run] =  BenchLogger::cost_call_number();
-				//cpt++;
 
 			}
-			std::cout << std::endl;
-
 
 
 			Result result;
@@ -221,7 +218,7 @@ private:
 		unsigned int optimal_once;
 		unsigned int optimal_all;
 
-		unsigned int nb_cost_call;
+		unsigned long long nb_cost_call;
 
 	};
 	std::map<std::string, std::vector<Result>> _result;
