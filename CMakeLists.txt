@@ -60,9 +60,11 @@ add_executable(VNDSolver ${shared_files} ${solver_files} src/executable/VND.cpp)
 add_executable(VNDPipedSolver ${shared_files} ${solver_files} src/executable/VNDPiped.cpp)
 add_executable(TabuSearchSolver ${shared_files} ${solver_files} src/executable/TabuSearch.cpp)
 add_executable(ILSSolver ${shared_files} ${solver_files} src/executable/ILS.cpp)
+add_executable(VNSSolver ${shared_files} ${solver_files} src/executable/VNS.cpp)
 
 # Benchmark
 add_executable(HillClimbingBenchmark ${shared_files} ${solver_files} src/executable/BenchHillClimbing.cpp)
 add_executable(VNDBenchmark ${shared_files} ${solver_files} src/executable/BenchVND.cpp)
 add_executable(TabuSearchBenchmark ${shared_files} ${solver_files} src/executable/BenchTabuSearch.cpp)
 add_executable(ILSBenchmark ${shared_files} ${solver_files} src/executable/BenchILS.cpp)
+add_executable(VNSBenchmark ${shared_files} ${solver_files} src/executable/VNSBenchmark.cpp)

@@ -14,6 +14,7 @@ class Benchmark {
 
 	typedef unsigned int Time;
 	typedef float Score;
+	typedef long long Number;
 
 public:
 
@@ -91,7 +92,7 @@ public:
 			Score score_run_list[RunNumber];
 			Time time_run_list[RunNumber];
 			bool optimal_found_list[RunNumber];
-			unsigned long long nb_cost_call_list[RunNumber];
+			Number nb_cost_call_list[RunNumber];
 
 			for(unsigned int run=0; run<RunNumber; run++) {
 				BenchLogger::reset(best_score[cpt], bench_name+"_update_"+std::to_string(cpt));
@@ -218,7 +219,7 @@ private:
 		unsigned int optimal_once;
 		unsigned int optimal_all;
 
-		unsigned long long nb_cost_call;
+		Number nb_cost_call;
 
 	};
 	std::map<std::string, std::vector<Result>> _result;
