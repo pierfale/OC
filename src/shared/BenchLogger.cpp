@@ -1,6 +1,6 @@
 #include "shared/BenchLogger.h"
 
-unsigned int BenchLogger::_verifier_call_number(0);
+unsigned long long BenchLogger::_verifier_call_number(0);
 unsigned int BenchLogger::_optimal_score;
 bool BenchLogger::_enable_upgrade(true);
 std::ofstream BenchLogger::_update_file;
@@ -24,7 +24,7 @@ void BenchLogger::verifier() {
 	_verifier_call_number++;
 }
 
-unsigned int BenchLogger::cost_call_number() {
+unsigned long long BenchLogger::cost_call_number() {
 	return _verifier_call_number;
 }
 

@@ -183,7 +183,7 @@ public:
 			}
 
 			t_end = std::chrono::high_resolution_clock::now();
-		} while(std::chrono::duration_cast<std::chrono::seconds>(t_end-t_start).count() < 1);
+		} while(std::chrono::duration_cast<std::chrono::seconds>(t_end-t_start).count() < 60);
 	}
 
 private:

@@ -9,7 +9,7 @@ int main(int argc, const char** argv) {
 	}
 
 
-	Benchmark<1> bench;
+	Benchmark<1> bench(argv[4]);
 
 	std::vector<const char*> inits = {"mdd"};
 
@@ -29,7 +29,7 @@ int main(int argc, const char** argv) {
 		bench.execute<TabuSearchSolver, TabuSearchProgramOption>(ARGS_NUMBER, bench_argv, argv[3], name);
 	}
 
-	bench.save(argv[4]);
+	bench.save();
 
 	return EXIT_SUCCESS;
 }

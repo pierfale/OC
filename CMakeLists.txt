@@ -61,6 +61,8 @@ add_executable(VNDPipedSolver ${shared_files} ${solver_files} src/executable/VND
 add_executable(TabuSearchSolver ${shared_files} ${solver_files} src/executable/TabuSearch.cpp)
 add_executable(ILSSolver ${shared_files} ${solver_files} src/executable/ILS.cpp)
 add_executable(VNSSolver ${shared_files} ${solver_files} src/executable/VNS.cpp)
+add_executable(GeneticAlgorithm ${shared_files} ${solver_files} src/executable/GeneticAlgorithm.cpp)
+add_executable(MemeticAlgorithm ${shared_files} ${solver_files} src/executable/MemeticAlgorithm.cpp)
 
 # Benchmark
 add_executable(HillClimbingBenchmark ${shared_files} ${solver_files} src/executable/BenchHillClimbing.cpp)
@@ -68,3 +70,5 @@ add_executable(VNDBenchmark ${shared_files} ${solver_files} src/executable/Bench
 add_executable(TabuSearchBenchmark ${shared_files} ${solver_files} src/executable/BenchTabuSearch.cpp)
 add_executable(ILSBenchmark ${shared_files} ${solver_files} src/executable/BenchILS.cpp)
 add_executable(VNSBenchmark ${shared_files} ${solver_files} src/executable/VNSBenchmark.cpp)
+add_executable(GeneticAlgorithmBenchmark ${shared_files} ${solver_files} src/executable/BenchGeneticAlgorithm.cpp)
+add_executable(MemeticAlgorithmBenchmark ${shared_files} ${solver_files} src/executable/BenchMemeticAlgorithm.cpp)

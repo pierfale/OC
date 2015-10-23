@@ -9,7 +9,7 @@ int main(int argc, const char** argv) {
 	}
 
 
-	Benchmark<1> bench;
+	Benchmark<1> bench(argv[4]);
 
 	std::vector<const char*> perturbations = {"swap"/*, "insert", "exchange"*/};
 	std::vector<const char*> stop = {"time"/*, "update"*/};
@@ -38,7 +38,7 @@ int main(int argc, const char** argv) {
 
 	}
 
-	bench.save(argv[4]);
+	bench.save();
 
 	return EXIT_SUCCESS;
 }

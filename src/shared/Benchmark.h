@@ -18,7 +18,7 @@ class Benchmark {
 
 public:
 
-	Benchmark() {
+	Benchmark(const std::string& output_file_pathname) : _output_file_pathname(output_file_pathname) {
 
 	}
 
@@ -95,7 +95,7 @@ public:
 			Number nb_cost_call_list[RunNumber];
 
 			for(unsigned int run=0; run<RunNumber; run++) {
-				BenchLogger::reset(best_score[cpt], bench_name+"_update_"+std::to_string(cpt));
+				BenchLogger::reset(best_score[cpt], _output_file_pathname+"_"+bench_name+"_update_"+std::to_string(cpt));
 
 				output.reset();
 				output.compute_score(input);
@@ -140,12 +140,12 @@ public:
 		}
 	}
 
-	void save(const std::string& output_file_pathname) {
+	void save() {
 
 		int nb_instance = _result.begin()->second.size();
 
 		for(unsigned int instance = 0; instance < nb_instance; instance++) {
-			std::ofstream file(output_file_pathname+"_"+std::to_string(instance), std::ios::out | std::ios::trunc);
+			std::ofstream file(_output_file_pathname+"_"+std::to_string(instance), std::ios::out | std::ios::trunc);
 
 			for(auto it = _result.begin(); it != _result.end(); ++it) {
 				file << it->first << "\t" << it->second[instance].average_score << "\t" << it->second[instance].min_score << "\t" << it->second[instance].max_score
@@ -157,7 +157,7 @@ public:
 		}
 
 		for(auto it = _result.begin(); it != _result.end(); ++it) {
-			std::ofstream file(output_file_pathname+"_"+it->first, std::ios::out | std::ios::trunc);
+			std::ofstream file(_output_file_pathname+"_"+it->first, std::ios::out | std::ios::trunc);
 			for(unsigned int instance = 0; instance < nb_instance; instance++) {
 				file << (instance+1)<< "\t" << it->second[instance].average_score << "\t" << it->second[instance].min_score << "\t" << it->second[instance].max_score
 					 << "\t" << it->second[instance].average_time << "\t" << it->second[instance].min_time << "\t" << it->second[instance].max_time
@@ -166,7 +166,7 @@ public:
 			file.close();
 		}
 
-		std::ofstream file(output_file_pathname, std::ios::out | std::ios::trunc);
+		std::ofstream file(_output_file_pathname, std::ios::out | std::ios::trunc);
 
 		for(auto it = _result.begin(); it != _result.end(); ++it) {
 			Result total = std::accumulate(it->second.begin(), it->second.end(), Result(), [](Result r1, Result r2) {
@@ -191,7 +191,7 @@ public:
 
 			file << it->first << "\t" << total.average_score/(Score)nb_instance << "\t" << total.min_score/(Score)nb_instance << "\t" << total.max_score/(Score)nb_instance
 				 << "\t" << total.average_time/(Time)nb_instance << "\t" << total.min_time/(Time)nb_instance << "\t" << total.max_time/(Time)nb_instance
-				 << "\t" << total.optimal_once << "\t" << total.optimal_all << "\t" << total.nb_cost_call/nb_instance << std::endl;
+				 << "\t" << total.optimal_once << "\t" << total.optimal_all << "\t" << total.nb_cost_call/(Number)nb_instance << std::endl;
 		}
 
 		file.close();
@@ -223,7 +223,7 @@ private:
 
 	};
 	std::map<std::string, std::vector<Result>> _result;
-
+	std::string _output_file_pathname;
 
 };
 

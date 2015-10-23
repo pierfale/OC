@@ -9,7 +9,7 @@ int main(int argc, const char** argv) {
 	}
 
 
-	Benchmark<1> bench;
+	Benchmark<1> bench(argv[4]);
 
 	std::vector<const char*> inits = {"rnd", "edd", "mdd"};
 	std::vector<const char*> selects = {"first", "best"};
@@ -44,7 +44,7 @@ int main(int argc, const char** argv) {
 
 	}
 
-	bench.save(argv[4]);
+	bench.save();
 
 	return EXIT_SUCCESS;
 }

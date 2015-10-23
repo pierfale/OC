@@ -25,12 +25,12 @@ public:
 		_update_file << _verifier_call_number << " " << (_optimal_score == 0 ? current_score : 100.0*(current_score-_optimal_score)/_optimal_score) << std::endl;
 	}
 
-	static unsigned int cost_call_number();
+	static unsigned long long cost_call_number();
 
 private:
 	BenchLogger();
 
-	static unsigned int _verifier_call_number;
+	static unsigned long long _verifier_call_number;
 	static unsigned int _optimal_score;
 	static bool _enable_upgrade;
 	static std::ofstream _update_file;
